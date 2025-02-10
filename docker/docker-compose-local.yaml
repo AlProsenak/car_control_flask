@@ -1,0 +1,24 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:9.2.0
+    container_name: carctrl_mysql
+    environment:
+      MYSQL_DATABASE: carctrl
+      MYSQL_USER: dbuser
+      MYSQL_PASSWORD: dbpasswd
+      MYSQL_ROOT_PASSWORD: dbadmin
+    ports:
+      - "3306:3306"
+    volumes:
+      - carctrl_mysql_volume:/var/lib/mysql
+    networks:
+      - carctrl_mysql_network
+    restart: on-failure
+
+volumes:
+  carctrl_mysql_volume:
+
+networks:
+  carctrl_mysql_network:
