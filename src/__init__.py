@@ -1,7 +1,8 @@
 from datetime import datetime
-from flask import Flask, request, abort
+from flask import Flask, request, jsonify, abort
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
+from flask_marshmallow import Marshmallow
 from jsonschema import validate
 from jsonschema.exceptions import ValidationError
 from sqlalchemy import BigInteger, SmallInteger, DECIMAL
@@ -11,6 +12,7 @@ app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = "mysql+mysqlconnector://dbuser:dbpasswd@localhost:3306/carctrl"
 
 db = SQLAlchemy(app)
+ma = Marshmallow(app)
 
 # Initialize Flask-Migrate extension, which allows for `flask db` migration commands to be run
 migrate = Migrate(app, db, directory='src/db/migrations')
@@ -19,6 +21,7 @@ migrate = Migrate(app, db, directory='src/db/migrations')
 # MODELS
 class Vehicle(db.Model):
     __tablename__ = 'vehicle'
+
     id = db.Column(BigInteger, primary_key=True, autoincrement=True)
     make = db.Column(db.String(20), nullable=False)
     model = db.Column(db.String(50), nullable=False)
@@ -50,85 +53,35 @@ class Vehicle(db.Model):
         return vehicle
 
 
-# DUMMY VEHICLE DATABASE
-vehicles = [
-    {
-        "id": 1,
-        "make": "Toyota",
-        "model": "Corolla",
-        "year": 2020,
-        "fuel_type": "Gasoline",
-        "door_count": 4,
-        "price": 20000.00,
-        "currency_code": "USD"
-    },
-    {
-        "id": 2,
-        "make": "Honda",
-        "model": "Civic",
-        "year": 2019,
-        "fuel_type": "Gasoline",
-        "door_count": 4,
-        "price": 18000.00,
-        "currency_code": "USD"
-    },
-    {
-        "id": 3,
-        "make": "Ford",
-        "model": "Mustang",
-        "year": 2021,
-        "fuel_type": "Gasoline",
-        "door_count": 2,
-        "price": 45000.00,
-        "currency_code": "USD"
-    },
-    {
-        "id": 4,
-        "make": "Tesla",
-        "model": "Model S",
-        "year": 2022,
-        "fuel_type": "Electric",
-        "door_count": 4,
-        "price": 80000.00,
-        "currency_code": "USD"
-    },
-    {
-        "id": 5,
-        "make": "Chevrolet",
-        "model": "Silverado",
-        "year": 2020,
-        "fuel_type": "Diesel",
-        "door_count": 4,
-        "price": 25000.00,
-        "currency_code": "USD"
-    }
-]
-next_id = len(vehicles) + 1
+class VehicleSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = Vehicle
+        ordered = True
 
 
 # ERROR HANDLERS
 @app.errorhandler(400)
 def bad_request(error):
-    response = {
+    response = jsonify({
         "status": 400,
         "message": error.description,
         "timestamp": datetime.now().isoformat()
-    }
-    return response, 400
+    }), 400
+    return response
 
 
 @app.errorhandler(404)
 def not_found(error):
-    response = {
+    response = jsonify({
         "status": 404,
         "message": error.description,
         "timestamp": datetime.now().isoformat()
-    }
-    return response, 404
+    }), 404
+    return response
 
 
 # VALIDATION SCHEMAS
-create_vehicle_schema = {
+create_vehicle_validation_schema = {
     "type": "object",
     "properties": {
         "vehicle": {
@@ -172,9 +125,9 @@ create_vehicle_schema = {
     "required": ["vehicle"]
 }
 
-update_vehicle_schema = {
+update_vehicle_validation_schema = {
     "allOf": [
-        create_vehicle_schema,
+        create_vehicle_validation_schema,
         {
             "type": "object",
             "properties": {
@@ -197,20 +150,29 @@ update_vehicle_schema = {
 # API
 @app.route('/api/v1/vehicle', methods=['GET'])
 def get_vehicles():
+    vehicle_entities = Vehicle.query.all()
+
+    vehicle_schema = VehicleSchema(many=True)
+    vehicle_json = vehicle_schema.dump(vehicle_entities)
+
     return {
-        "vehicles": vehicles
+        "vehicles": vehicle_json
     }
 
 
 @app.route('/api/v1/vehicle/<int:id>', methods=['GET'])
 def get_vehicle(id: int):
-    for vehicle in vehicles:
-        if vehicle["id"] == id:
-            return {
-                "vehicle": vehicle
-            }
-        else:
-            abort(404, f"Vehicle with ID: {id} not found")
+    vehicle_entity = Vehicle.query.get(id)
+
+    if vehicle_entity is None:
+        abort(404, f"Vehicle with ID: {id} not found")
+
+    vehicle_schema = VehicleSchema()
+    vehicle_json = vehicle_schema.dump(vehicle_entity)
+
+    return {
+        "vehicle": vehicle_json
+    }
 
 
 @app.route('/api/v1/vehicle', methods=['POST'])
@@ -218,19 +180,22 @@ def create_vehicle():
     global next_id
     try:
         request_data = request.get_json()
-        validate(instance=request_data, schema=create_vehicle_schema)
+        validate(instance=request_data, schema=create_vehicle_validation_schema)
 
-        new_vehicle = request_data['vehicle']
-        new_vehicle['id'] = next_id
+        new_vehicle_data = request_data['vehicle']
+        new_vehicle_entity = Vehicle(**new_vehicle_data)
 
-        vehicles.append(new_vehicle)
-        next_id = len(vehicles) + 1
+        db.session.add(new_vehicle_entity)
+        db.session.commit()
+
+        vehicle_schema = VehicleSchema()
+        vehicle_json = vehicle_schema.dump(new_vehicle_entity)
 
         return {
             "status": 201,
             "message": "success",
             "timestamp": datetime.now().isoformat(),
-            "created_vehicle": new_vehicle
+            "created_vehicle": vehicle_json
         }
     except ValidationError as e:
         abort(400, e.message)
@@ -240,46 +205,58 @@ def create_vehicle():
 def update_vehicle():
     try:
         request_data = request.get_json()
-        validate(instance=request_data, schema=update_vehicle_schema)
+        validate(instance=request_data, schema=update_vehicle_validation_schema)
 
         search_id = request_data['vehicle']['id']
-        updated_vehicle = request_data['vehicle']
-        for i, vehicle in enumerate(vehicles):
-            if vehicle['id'] == search_id:
-                vehicles[i] = updated_vehicle
+        vehicle_entity = Vehicle.query.get(search_id)
 
-                return {
-                    "status": 200,
-                    "message": "success",
-                    "timestamp": datetime.now().isoformat(),
-                    "updated_vehicle": vehicles[i]
-                }
-            else:
-                abort(404, f"Vehicle with ID: {search_id} not found")
+        if vehicle_entity is None:
+            abort(404, f"Vehicle with ID: {search_id} not found")
+
+        vehicle_data = request_data['vehicle']
+
+        # TODO: mapper function
+        vehicle_entity.make = vehicle_data['make']
+        vehicle_entity.model = vehicle_data['model']
+        vehicle_entity.year = vehicle_data['year']
+        vehicle_entity.fuel_type = vehicle_data['fuel_type']
+        vehicle_entity.door_count = vehicle_data['door_count']
+        vehicle_entity.price = vehicle_data['price']
+        vehicle_entity.currency_code = vehicle_data['currency_code']
+
+        db.session.commit()
+
+        vehicle_schema = VehicleSchema()
+        updated_vehicle_json = vehicle_schema.dump(vehicle_entity)
+
+        return {
+            "status": 200,
+            "message": "success",
+            "timestamp": datetime.now().isoformat(),
+            "updated_vehicle": updated_vehicle_json
+        }
     except ValidationError as e:
         abort(400, e.message)
 
 
 @app.route('/api/v1/vehicle/<int:id>', methods=['DELETE'])
 def delete_vehicle(id: int):
-    global next_id
+    vehicle_entity = Vehicle.query.get(id)
 
-    vehicle_index = -1
-    for i, vehicle in enumerate(vehicles):
-        if vehicle['id'] == id:
-            vehicle_index = i
-
-    if vehicle_index == -1:
+    if vehicle_entity is None:
         abort(404, f"Vehicle with ID: {id} not found")
 
-    deleted_vehicle = vehicles.pop(vehicle_index)
-    next_id = len(vehicles) + 1
+    db.session.delete(vehicle_entity)
+    db.session.commit()
+
+    vehicle_schema = VehicleSchema()
+    deleted_vehicle_json = vehicle_schema.dump(vehicle_entity)
 
     return {
         "status": 200,
         "message": "success",
         "timestamp": datetime.now().isoformat(),
-        "deleted_vehicle": deleted_vehicle
+        "deleted_vehicle": deleted_vehicle_json
     }
 
 
