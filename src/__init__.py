@@ -185,6 +185,21 @@ description_attribute = {
 }
 
 # VALIDATION SCHEMAS
+get_vehicle_validation_schema = {
+    "type": "object",
+    "properties": {
+        "make": make_attribute,
+        "model": model_attribute,
+        "year_min": year_attribute,
+        "year_max": year_attribute,
+        "price_min": price_attribute,
+        "price_max": price_attribute,
+        "currency_code": currency_code_attribute
+    },
+    # Disallows query parameters that are not listed in properties
+    "additionalProperties": False,
+}
+
 create_vehicle_validation_schema = {
     "type": "object",
     "properties": {
@@ -228,14 +243,40 @@ update_vehicle_validation_schema = {
 # API
 @app.route('/api/v1/vehicle', methods=['GET'])
 def get_vehicles():
-    vehicle_entities = Vehicle.query.all()
+    try:
+        validate(request.args, get_vehicle_validation_schema)
 
-    vehicle_schema = VehicleSchema(many=True)
-    vehicle_json = vehicle_schema.dump(vehicle_entities)
+        vehicle_query = Vehicle.query
 
-    return {
-        "vehicles": vehicle_json
-    }
+        # Filter
+        # TODO: refactor query parameters and filters to work with lists
+        query_params = request.args.to_dict()
+        if 'make' in query_params:
+            vehicle_query = vehicle_query.filter(Vehicle.make.ilike(f"%{query_params['make']}%"))
+        if 'model' in query_params:
+            vehicle_query = vehicle_query.filter(Vehicle.model.ilike(f"%{query_params['model']}%"))
+        if 'year_min' in query_params:
+            vehicle_query = vehicle_query.filter_by(Vehicle.year >= query_params['year_min'])
+        if 'year_max' in query_params:
+            vehicle_query = vehicle_query.filter_by(Vehicle.year <= query_params['year_max'])
+        if 'price_min' in query_params:
+            vehicle_query = vehicle_query.filter_by(Vehicle.price >= query_params['price_min'])
+        if 'price_max' in query_params:
+            vehicle_query = vehicle_query.filter_by(Vehicle.price <= query_params['price_max'])
+        if 'currency_code' in query_params:
+            vehicle_query = vehicle_query.filter(Vehicle.currency_code == query_params['currency_code'])
+
+        # Query data
+        vehicle_entities = vehicle_query.all()
+
+        vehicle_schema = VehicleSchema(many=True)
+        vehicle_json = vehicle_schema.dump(vehicle_entities)
+
+        return {
+            "vehicles": vehicle_json
+        }
+    except ValidationError as e:
+        abort(400, e.message)
 
 
 @app.route('/api/v1/vehicle/<int:id>', methods=['GET'])
