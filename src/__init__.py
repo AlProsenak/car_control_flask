@@ -137,8 +137,8 @@ id_attribute = {
 
 make_attribute = {
     "type": "string",
-    "min_length": make_db_min_len,
-    "max_length": make_db_max_len,
+    "minLength": make_db_min_len,
+    "maxLength": make_db_max_len,
     # Disallows strings that have white space at start, end, or are blank.
     # TODO: test and enable later if it works
     # "pattern": "^\\S.*\\S$|^\\S+$"
@@ -146,8 +146,8 @@ make_attribute = {
 
 model_attribute = {
     "type": "string",
-    "min_length": model_db_min_len,
-    "max_length": model_db_max_len
+    "minLength": model_db_min_len,
+    "maxLength": model_db_max_len
 }
 
 year_attribute = {
@@ -180,8 +180,8 @@ currency_code_attribute = {
 
 description_attribute = {
     "type": "string",
-    "min_length": description_db_min_len,
-    "max_length": description_db_max_len
+    "minLength": description_db_min_len,
+    "maxLength": description_db_max_len
 }
 
 # VALIDATION SCHEMAS
