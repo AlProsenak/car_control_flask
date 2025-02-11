@@ -80,6 +80,52 @@ def not_found(error):
     return response
 
 
+# VALIDATION SCHEMA ATTRIBUTES
+id_attribute = {
+    "type": "integer",
+    "minimum": 0
+}
+
+make_attribute = {
+    "type": "string",
+    "min_length": 1,
+    "max_length": 20
+}
+
+model_attribute = {
+    "type": "string",
+    "min_length": 1,
+    "max_length": 20
+}
+
+year_attribute = {
+    "type": "integer",
+    "format": "yyyy",
+    "minimum": 1900,
+    "maximum": datetime.now().year
+}
+
+fuel_type_attribute = {
+    "type": "string",
+    "enum": ["Diesel", "Electric", "Gasoline"]
+}
+
+door_count_attribute = {
+    "type": "integer",
+    "minimum": 1,
+    "maximum": 256
+}
+
+price_attribute = {
+    "type": "number",
+    "minimum": 0
+}
+
+currency_code_attribute = {
+    "type": "string",
+    "enum": ["AUD", "CAD", "CHF", "CNY", "EUR", "GBP", "INR", "JPY", "NZD", "SGD", "USD", "ZAR"]
+}
+
 # VALIDATION SCHEMAS
 create_vehicle_validation_schema = {
     "type": "object",
@@ -87,37 +133,13 @@ create_vehicle_validation_schema = {
         "vehicle": {
             "type": "object",
             "properties": {
-                "make": {
-                    "type": "string",
-                    "min_length": 1,
-                    "max_length": 20
-                },
-                "model": {
-                    "type": "string",
-                    "min_length": 1,
-                    "max_length": 20
-                },
-                "year": {
-                    "type": "integer",
-                    "maximum": datetime.now().year,
-                },
-                "fuel_type": {
-                    "type": "string",
-                    "enum": ["Gasoline", "Electric", "Diesel"]
-                },
-                "door_count": {
-                    "type": "integer",
-                    "minimum": 1,
-                    "maximum": 256
-                },
-                "price": {
-                    "type": "number",
-                    "minimum": 0
-                },
-                "currency_code": {
-                    "type": "string",
-                    "enum": ["AUD", "CAD", "CHF", "CNY", "EUR", "GBP", "INR", "JPY", "NZD", "SGD", "USD", "ZAR"]
-                }
+                "make": make_attribute,
+                "model": model_attribute,
+                "year": year_attribute,
+                "fuel_type": fuel_type_attribute,
+                "door_count": door_count_attribute,
+                "price": price_attribute,
+                "currency_code": currency_code_attribute
             },
             "required": ["make", "model", "year", "fuel_type", "door_count", "price", "currency_code"]
         }
@@ -134,10 +156,7 @@ update_vehicle_validation_schema = {
                 "vehicle": {
                     "type": "object",
                     "properties": {
-                        "id": {
-                            "type": "integer",
-                            "minimum": 1
-                        }
+                        "id": id_attribute
                     },
                     "required": ["id"]
                 }
@@ -177,7 +196,6 @@ def get_vehicle(id: int):
 
 @app.route('/api/v1/vehicle', methods=['POST'])
 def create_vehicle():
-    global next_id
     try:
         request_data = request.get_json()
         validate(instance=request_data, schema=create_vehicle_validation_schema)
