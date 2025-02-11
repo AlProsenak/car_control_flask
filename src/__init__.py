@@ -1,11 +1,13 @@
 from datetime import datetime
+from enum import Enum
 from flask import Flask, request, jsonify, abort
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_marshmallow import Marshmallow
 from jsonschema import validate
 from jsonschema.exceptions import ValidationError
-from sqlalchemy import BigInteger, SmallInteger, DECIMAL
+from sqlalchemy import func, Column, Index, CheckConstraint, BigInteger, SmallInteger, DECIMAL
+from sqlalchemy.types import Enum as SQLEnum
 
 app = Flask(__name__)
 
@@ -17,26 +19,72 @@ ma = Marshmallow(app)
 # Initialize Flask-Migrate extension, which allows for `flask db` migration commands to be run
 migrate = Migrate(app, db, directory='src/db/migrations')
 
+# MODEL TYPES AND CONSTANTS
+make_db_min_len = 1
+make_db_max_len = 20
+model_db_min_len = 1
+model_db_max_len = 50
+year_db_min = 1900
+price_db_min = 0
+door_count_db_min = 0
+door_count_db_max = 256
+description_db_min_len = 1
+description_db_max_len = 1024
+
+
+class FuelType(Enum):
+    DIESEL = "DIESEL"
+    ELECTRIC = "ELECTRIC"
+    GASOLINE = "GASOLINE"
+
+
+class CurrencyCode(Enum):
+    AUD = "AUD"
+    CAD = "CAD"
+    CHF = "CHF"
+    CNY = "CNY"
+    EUR = "EUR"
+    GBP = "GBP"
+    JPY = "JPY"
+    USD = "USD"
+
 
 # MODELS
 class Vehicle(db.Model):
     __tablename__ = 'vehicle'
 
     id = db.Column(BigInteger, primary_key=True, autoincrement=True)
-    make = db.Column(db.String(20), nullable=False)
-    model = db.Column(db.String(50), nullable=False)
+    make = db.Column(db.String(make_db_max_len), nullable=False)
+    model = db.Column(db.String(model_db_max_len), nullable=False)
     year = db.Column(SmallInteger, nullable=False)
-    fuel_type = db.Column(db.String(50), nullable=False)
+    fuel_type = Column(SQLEnum(FuelType), nullable=False)
     door_count = db.Column(SmallInteger, nullable=False)
     price = db.Column(DECIMAL(32, 8), nullable=False)
-    currency_code = db.Column(db.String(3), nullable=False)
+    currency_code = Column(SQLEnum(CurrencyCode), nullable=False)
+    description = db.Column(db.String(description_db_max_len), nullable=True)
 
+    Index('idx_vehicle_make', make, unique=False)
+    Index('idx_vehicle_model', model, unique=False)
+    Index('idx_vehicle_year', year, unique=False)
+    Index('idx_vehicle_price', price, unique=False)
+    Index('idx_vehicle_currency_code', currency_code, unique=False)
+
+    CheckConstraint(func.length(make) >= make_db_min_len, 'ck_vehicle_make_min_length')
+    CheckConstraint(func.length(model) >= model_db_min_len, 'ck_vehicle_model_min_length')
+    CheckConstraint(year >= year_db_min, 'ck_vehicle_year_min')
+    # TODO: figure out how to implement current year constraint - MySQL has limitation for non-static constraints
+    CheckConstraint(door_count >= door_count_db_min, 'ck_vehicle_door_count_min')
+    CheckConstraint(door_count <= door_count_db_max, 'ck_vehicle_door_count_max')
+    CheckConstraint(price >= price_db_min, 'ck_vehicle_price_min')
+    CheckConstraint(func.length(description) >= description_db_min_len, 'ck_vehicle_description_db_len')
+
+    # TODO: adjust to a better format
     def __repr__(self) -> str:
         return (f"<Vehicle(id={self.id}, make='{self.make}', model='{self.model}', year={self.year}, "
                 f"fuel_type='{self.fuel_type}', door_count={self.door_count}, "
-                f"price={self.price}), currency_code={self.currency_code})>")
+                f"price={self.price}), currency_code={self.currency_code}), description='{self.description}'>")
 
-    def __init__(self, make, model, year, fuel_type, door_count, price, currency_code, id=None):
+    def __init__(self, make, model, year, fuel_type, door_count, price, currency_code, id=None, description=None):
         self.id = id
         self.make = make
         self.model = model
@@ -45,6 +93,7 @@ class Vehicle(db.Model):
         self.door_count = door_count
         self.price = price
         self.currency_code = currency_code
+        self.description = description
 
     @classmethod
     def with_id(cls, make, model, year, fuel_type, door_count, price, currency_code, id):
@@ -88,42 +137,51 @@ id_attribute = {
 
 make_attribute = {
     "type": "string",
-    "min_length": 1,
-    "max_length": 20
+    "min_length": make_db_min_len,
+    "max_length": make_db_max_len,
+    # Disallows strings that have white space at start, end, or are blank.
+    # TODO: test and enable later if it works
+    # "pattern": "^\\S.*\\S$|^\\S+$"
 }
 
 model_attribute = {
     "type": "string",
-    "min_length": 1,
-    "max_length": 20
+    "min_length": model_db_min_len,
+    "max_length": model_db_max_len
 }
 
 year_attribute = {
     "type": "integer",
     "format": "yyyy",
-    "minimum": 1900,
+    "minimum": year_db_min,
     "maximum": datetime.now().year
 }
 
 fuel_type_attribute = {
     "type": "string",
-    "enum": ["Diesel", "Electric", "Gasoline"]
+    "enum": ["DIESEL", "ELECTRIC", "GASOLINE"]
 }
 
 door_count_attribute = {
     "type": "integer",
-    "minimum": 1,
-    "maximum": 256
+    "minimum": door_count_db_min,
+    "maximum": door_count_db_max
 }
 
 price_attribute = {
     "type": "number",
-    "minimum": 0
+    "minimum": price_db_min
 }
 
 currency_code_attribute = {
     "type": "string",
-    "enum": ["AUD", "CAD", "CHF", "CNY", "EUR", "GBP", "INR", "JPY", "NZD", "SGD", "USD", "ZAR"]
+    "enum": ["AUD", "CAD", "CHF", "CNY", "EUR", "GBP", "JPY", "USD"]
+}
+
+description_attribute = {
+    "type": "string",
+    "min_length": description_db_min_len,
+    "max_length": description_db_max_len
 }
 
 # VALIDATION SCHEMAS
@@ -139,7 +197,8 @@ create_vehicle_validation_schema = {
                 "fuel_type": fuel_type_attribute,
                 "door_count": door_count_attribute,
                 "price": price_attribute,
-                "currency_code": currency_code_attribute
+                "currency_code": currency_code_attribute,
+                "description": description_attribute
             },
             "required": ["make", "model", "year", "fuel_type", "door_count", "price", "currency_code"]
         }
@@ -241,6 +300,7 @@ def update_vehicle():
         vehicle_entity.door_count = vehicle_data['door_count']
         vehicle_entity.price = vehicle_data['price']
         vehicle_entity.currency_code = vehicle_data['currency_code']
+        vehicle_entity.description = vehicle_data['description']
 
         db.session.commit()
 
