@@ -159,7 +159,7 @@ year_attribute = {
 
 fuel_type_attribute = {
     "type": "string",
-    "enum": ["DIESEL", "ELECTRIC", "GASOLINE"]
+    "enum": [member.value for member in FuelType]
 }
 
 door_count_attribute = {
@@ -175,7 +175,7 @@ price_attribute = {
 
 currency_code_attribute = {
     "type": "string",
-    "enum": ["AUD", "CAD", "CHF", "CNY", "EUR", "GBP", "JPY", "USD"]
+    "enum": [member.value for member in CurrencyCode]
 }
 
 description_attribute = {
