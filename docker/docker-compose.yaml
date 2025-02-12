@@ -1,0 +1,26 @@
+# Docker compose specification version is now obsolete:
+# https://forums.docker.com/t/docker-compose-yml-version-is-obsolete/141313
+#version: '3.9'
+
+services:
+  mysql:
+    image: mysql:9.2.0
+    container_name: ${DATABASE_CONTAINER_NAME}
+    environment:
+      MYSQL_DATABASE: carctrl
+      MYSQL_USER: ${DATABASE_USERNAME}
+      MYSQL_PASSWORD: ${DATABASE_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${DATABASE_ADMIN}
+    ports:
+      - "3306:3306"
+    volumes:
+      - carctrl_mysql_volume:/var/lib/mysql
+    networks:
+      - carctrl_mysql_network
+    restart: on-failure
+
+volumes:
+  carctrl_mysql_volume:
+
+networks:
+  carctrl_mysql_network:

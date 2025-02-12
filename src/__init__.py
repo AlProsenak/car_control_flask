@@ -9,9 +9,22 @@ from jsonschema.exceptions import ValidationError
 from sqlalchemy import asc, desc, func, and_, BigInteger, SmallInteger, DECIMAL, String
 from sqlalchemy.types import Enum as SQLEnum
 
+import os
+
+# APPLICATION SPECIFIC IMPORTS
+from src import config
+
 app = Flask(__name__)
 
-app.config['SQLALCHEMY_DATABASE_URI'] = "mysql+mysqlconnector://dbuser:dbpasswd@localhost:3306/carctrl"
+environment = os.environ.get('FLASK_ENV', 'local')
+print(f"Starting application with environment: {environment}")
+
+if environment == 'local':
+    app.config.from_object(config.LocalConfig)
+elif environment == 'development':
+    app.config.from_object(config.DevelopmentConfig)
+else:
+    raise ValueError('Invalid environment value: ' + environment)
 
 db = SQLAlchemy(app)
 ma = Marshmallow(app)
@@ -351,7 +364,7 @@ def get_vehicles():
         offset = (page_number - 1) * page_size
 
         first_page = page_number == 1
-        last_page =  page_number == total_pages
+        last_page = page_number == total_pages
         empty_page = page_number > total_pages or page_number < 1
 
         # Query data

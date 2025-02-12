@@ -7,6 +7,9 @@ instance/*
 .webassets-cache
 .env
 
+# Docker exception
+!docker/.env
+
 ### Flask.Python Stack ###
 # Byte-compiled / optimized / DLL files
 __pycache__/
