@@ -6,7 +6,7 @@ from flask_migrate import Migrate
 from flask_marshmallow import Marshmallow
 from jsonschema import validate
 from jsonschema.exceptions import ValidationError
-from sqlalchemy import asc, desc, func, Column, Index, CheckConstraint, BigInteger, SmallInteger, DECIMAL
+from sqlalchemy import asc, desc, func, and_, Column, Index, CheckConstraint, BigInteger, SmallInteger, DECIMAL
 from sqlalchemy.types import Enum as SQLEnum
 
 app = Flask(__name__)
@@ -184,17 +184,36 @@ description_attribute = {
     "maxLength": description_db_max_len
 }
 
+# Workaround attributes due to query parameters being considered as strings which as a result fails jsonschema validation.
+year_query_param_attribute = {
+    "type": "string",
+    "pattern": "^(19[0-9]{2}|2[0-9]{3})$",
+    # Documentation parameters
+    "format": "yyyy",
+    "minimum": year_db_min,
+    "maximum": datetime.now().year
+}
+
+price_query_param_attribute = {
+    "type": "string",
+    "pattern": "^[0-9]+(\\.[0-9]+)?$",
+    # Documentation parameters
+    "minimum": 0
+}
+
 # VALIDATION SCHEMAS
 get_vehicle_validation_schema = {
     "type": "object",
     "properties": {
         # FILTER
         "make": make_attribute,
+        "make_like": make_attribute,
         "model": model_attribute,
-        "year_min": year_attribute,
-        "year_max": year_attribute,
-        "price_min": price_attribute,
-        "price_max": price_attribute,
+        "model_like": model_attribute,
+        "year_min": year_query_param_attribute,
+        "year_max": year_query_param_attribute,
+        "price_min": price_query_param_attribute,
+        "price_max": price_query_param_attribute,
         "currency_code": currency_code_attribute,
 
         # SORT
@@ -262,22 +281,31 @@ def get_vehicles():
         vehicle_query = Vehicle.query
 
         # Filter
-        # TODO: refactor query parameters and filters to work with lists
+        # TODO: refactor query parameters and filters to also work with lists
+        # TODO: custom constraint validation for numeric query parameters (year, price)
+        filters = []
         query_params = request.args.to_dict()
         if 'make' in query_params:
-            vehicle_query = vehicle_query.filter(Vehicle.make.ilike(f"%{query_params['make']}%"))
+            filters.append(Vehicle.make == query_params['make'])
+        if 'make_like' in query_params:
+            filters.append(Vehicle.make.ilike(f"%{query_params['make_like']}%"))
         if 'model' in query_params:
-            vehicle_query = vehicle_query.filter(Vehicle.model.ilike(f"%{query_params['model']}%"))
+            filters.append(Vehicle.model == query_params['model'])
+        if 'model_like' in query_params:
+            filters.append(Vehicle.model.ilike(f"%{query_params['model_like']}%"))
         if 'year_min' in query_params:
-            vehicle_query = vehicle_query.filter_by(Vehicle.year >= query_params['year_min'])
+            filters.append(Vehicle.year >= query_params['year_min'])
         if 'year_max' in query_params:
-            vehicle_query = vehicle_query.filter_by(Vehicle.year <= query_params['year_max'])
+            filters.append(Vehicle.year <= query_params['year_max'])
         if 'price_min' in query_params:
-            vehicle_query = vehicle_query.filter_by(Vehicle.price >= query_params['price_min'])
+            filters.append(Vehicle.price >= query_params['price_min'])
         if 'price_max' in query_params:
-            vehicle_query = vehicle_query.filter_by(Vehicle.price <= query_params['price_max'])
+            filters.append(Vehicle.price <= query_params['price_max'])
         if 'currency_code' in query_params:
-            vehicle_query = vehicle_query.filter(Vehicle.currency_code == query_params['currency_code'])
+            filters.append(Vehicle.currency_code == query_params['currency_code'])
+
+        if filters:
+            vehicle_query = vehicle_query.filter(and_(*filters))
 
         # Sort
         sort_by = query_params.get('sort_by', 'id').lower()
