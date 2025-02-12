@@ -442,7 +442,7 @@ def update_vehicle():
         vehicle_entity.door_count = vehicle_data['door_count']
         vehicle_entity.price = vehicle_data['price']
         vehicle_entity.currency_code = vehicle_data['currency_code']
-        vehicle_entity.description = vehicle_data['description']
+        vehicle_entity.description = vehicle_data.get('description', None)
 
         db.session.commit()
 
