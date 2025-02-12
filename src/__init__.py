@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from enum import Enum
 from flask import Flask, request, jsonify, abort
 from flask_sqlalchemy import SQLAlchemy
@@ -6,7 +6,7 @@ from flask_migrate import Migrate
 from flask_marshmallow import Marshmallow
 from jsonschema import validate
 from jsonschema.exceptions import ValidationError
-from sqlalchemy import asc, desc, func, and_, Column, Index, CheckConstraint, BigInteger, SmallInteger, DECIMAL
+from sqlalchemy import asc, desc, func, and_, BigInteger, SmallInteger, DECIMAL, String
 from sqlalchemy.types import Enum as SQLEnum
 
 app = Flask(__name__)
@@ -54,29 +54,32 @@ class Vehicle(db.Model):
     __tablename__ = 'vehicle'
 
     id = db.Column(BigInteger, primary_key=True, autoincrement=True)
-    make = db.Column(db.String(make_db_max_len), nullable=False)
-    model = db.Column(db.String(model_db_max_len), nullable=False)
+    make = db.Column(String(make_db_max_len), nullable=False)
+    model = db.Column(String(model_db_max_len), nullable=False)
     year = db.Column(SmallInteger, nullable=False)
-    fuel_type = Column(SQLEnum(FuelType), nullable=False)
+    fuel_type = db.Column(SQLEnum(FuelType), nullable=False)
     door_count = db.Column(SmallInteger, nullable=False)
     price = db.Column(DECIMAL(32, 8), nullable=False)
-    currency_code = Column(SQLEnum(CurrencyCode), nullable=False)
-    description = db.Column(db.String(description_db_max_len), nullable=True)
+    currency_code = db.Column(SQLEnum(CurrencyCode), nullable=False)
+    description = db.Column(String(description_db_max_len), nullable=True)
 
-    Index('idx_vehicle_make', make, unique=False)
-    Index('idx_vehicle_model', model, unique=False)
-    Index('idx_vehicle_year', year, unique=False)
-    Index('idx_vehicle_price', price, unique=False)
-    Index('idx_vehicle_currency_code', currency_code, unique=False)
+    created_at = db.Column(db.DateTime, default=datetime.now(timezone.utc))
+    updated_at = db.Column(db.DateTime, default=datetime.now(timezone.utc), onupdate=datetime.now(timezone.utc))
 
-    CheckConstraint(func.length(make) >= make_db_min_len, 'ck_vehicle_make_min_length')
-    CheckConstraint(func.length(model) >= model_db_min_len, 'ck_vehicle_model_min_length')
-    CheckConstraint(year >= year_db_min, 'ck_vehicle_year_min')
+    db.Index('idx_vehicle_make', make, unique=False)
+    db.Index('idx_vehicle_model', model, unique=False)
+    db.Index('idx_vehicle_year', year, unique=False)
+    db.Index('idx_vehicle_price', price, unique=False)
+    db.Index('idx_vehicle_currency_code', currency_code, unique=False)
+
+    db.CheckConstraint(func.length(make) >= make_db_min_len, 'ck_vehicle_make_min_length')
+    db.CheckConstraint(func.length(model) >= model_db_min_len, 'ck_vehicle_model_min_length')
+    db.CheckConstraint(year >= year_db_min, 'ck_vehicle_year_min')
     # TODO: figure out how to implement current year constraint - MySQL has limitation for non-static constraints
-    CheckConstraint(door_count >= door_count_db_min, 'ck_vehicle_door_count_min')
-    CheckConstraint(door_count <= door_count_db_max, 'ck_vehicle_door_count_max')
-    CheckConstraint(price >= price_db_min, 'ck_vehicle_price_min')
-    CheckConstraint(func.length(description) >= description_db_min_len, 'ck_vehicle_description_db_len')
+    db.CheckConstraint(door_count >= door_count_db_min, 'ck_vehicle_door_count_min')
+    db.CheckConstraint(door_count <= door_count_db_max, 'ck_vehicle_door_count_max')
+    db.CheckConstraint(price >= price_db_min, 'ck_vehicle_price_min')
+    db.CheckConstraint(func.length(description) >= description_db_min_len, 'ck_vehicle_description_db_len')
 
     # TODO: adjust to a better format
     def __repr__(self) -> str:
