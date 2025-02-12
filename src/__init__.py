@@ -6,7 +6,7 @@ from flask_migrate import Migrate
 from flask_marshmallow import Marshmallow
 from jsonschema import validate
 from jsonschema.exceptions import ValidationError
-from sqlalchemy import func, Column, Index, CheckConstraint, BigInteger, SmallInteger, DECIMAL
+from sqlalchemy import asc, desc, func, Column, Index, CheckConstraint, BigInteger, SmallInteger, DECIMAL
 from sqlalchemy.types import Enum as SQLEnum
 
 app = Flask(__name__)
@@ -188,16 +188,29 @@ description_attribute = {
 get_vehicle_validation_schema = {
     "type": "object",
     "properties": {
+        # FILTER
         "make": make_attribute,
         "model": model_attribute,
         "year_min": year_attribute,
         "year_max": year_attribute,
         "price_min": price_attribute,
         "price_max": price_attribute,
-        "currency_code": currency_code_attribute
+        "currency_code": currency_code_attribute,
+
+        # SORT
+        "sort_by": {
+            "type": "string",
+            "enum": ["make", "model", "year", "price", "MAKE", "MODEL", "YEAR", "PRICE"]
+        },
+        "sort_order": {
+            "type": "string",
+            "enum": ["asc", "desc", "ASC", "DESC"],
+            # Possible case-insensitive alternative approach to an enum
+            # "pattern": "^[Aa][Ss][Cc]|[Dd][Ee][Ss][Cc]$"
+        }
     },
     # Disallows query parameters that are not listed in properties
-    "additionalProperties": False,
+    "additionalProperties": False
 }
 
 create_vehicle_validation_schema = {
@@ -265,6 +278,14 @@ def get_vehicles():
             vehicle_query = vehicle_query.filter_by(Vehicle.price <= query_params['price_max'])
         if 'currency_code' in query_params:
             vehicle_query = vehicle_query.filter(Vehicle.currency_code == query_params['currency_code'])
+
+        # Sort
+        sort_by = query_params.get('sort_by', 'id').lower()
+        sort_order = query_params.get('sort_order', 'asc').lower()
+        if sort_order == 'desc':
+            vehicle_query = vehicle_query.order_by(desc(getattr(Vehicle, sort_by)))
+        else:
+            vehicle_query = vehicle_query.order_by(asc(getattr(Vehicle, sort_by)))
 
         # Query data
         vehicle_entities = vehicle_query.all()
