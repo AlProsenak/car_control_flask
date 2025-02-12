@@ -145,6 +145,16 @@ def not_found(error):
     return response
 
 
+@app.errorhandler(500)
+def internal_server_error(error):
+    response = jsonify({
+        "status": 500,
+        "message": error.description,
+        "timestamp": datetime.now().isoformat()
+    }), 500
+    return response
+
+
 # REGEX
 regex_decimal_from_0_to_infinity = "^[0-9]+(\\.[0-9]+)?$"
 regex_integer_from_1_to_infinity = "^[1-9][0-9]*$"
