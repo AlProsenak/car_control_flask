@@ -129,6 +129,12 @@ def not_found(error):
     return response
 
 
+# REGEX
+regex_decimal_from_0_to_infinity = "^[0-9]+(\\.[0-9]+)?$"
+regex_integer_from_1_to_infinity = "^[1-9][0-9]*$"
+# Adjust `2` after `|` operator if higher top limit is desired. Example: `[2-9][0-9]{3}$` -> from 2000 to 9999
+regex_integer_from_1900_to_2999 = "^(19[0-9]{2}|2[0-9]{3})$"
+
 # VALIDATION SCHEMA ATTRIBUTES
 id_attribute = {
     "type": "integer",
@@ -187,7 +193,7 @@ description_attribute = {
 # Workaround attributes due to query parameters being considered as strings which as a result fails jsonschema validation.
 year_query_param_attribute = {
     "type": "string",
-    "pattern": "^(19[0-9]{2}|2[0-9]{3})$",
+    "pattern": regex_integer_from_1900_to_2999,
     # Documentation parameters
     "format": "yyyy",
     "minimum": year_db_min,
@@ -196,9 +202,23 @@ year_query_param_attribute = {
 
 price_query_param_attribute = {
     "type": "string",
-    "pattern": "^[0-9]+(\\.[0-9]+)?$",
+    "pattern": regex_decimal_from_0_to_infinity,
     # Documentation parameters
     "minimum": 0
+}
+
+page_size_query_param_attribute = {
+    "type": "string",
+    "pattern": regex_integer_from_1_to_infinity,
+    # Documentation parameters
+    "minimum": 1
+}
+
+page_number_query_param_attribute = {
+    "type": "string",
+    "pattern": regex_integer_from_1_to_infinity,
+    # Documentation parameters
+    "minimum": 1
 }
 
 # VALIDATION SCHEMAS
@@ -226,7 +246,11 @@ get_vehicle_validation_schema = {
             "enum": ["asc", "desc", "ASC", "DESC"],
             # Possible case-insensitive alternative approach to an enum
             # "pattern": "^[Aa][Ss][Cc]|[Dd][Ee][Ss][Cc]$"
-        }
+        },
+
+        # PAGINATION
+        "page_size": page_size_query_param_attribute,
+        "page_number": page_number_query_param_attribute
     },
     # Disallows query parameters that are not listed in properties
     "additionalProperties": False
@@ -315,14 +339,39 @@ def get_vehicles():
         else:
             vehicle_query = vehicle_query.order_by(asc(getattr(Vehicle, sort_by)))
 
-        # Query data
-        vehicle_entities = vehicle_query.all()
+        # Pagination
+        page_number = int(request.args.get('page_number', 1))
+        page_size = int(request.args.get('page_size', 10))
 
+        total_count = vehicle_query.count()
+        total_pages = (total_count + page_size - 1) // page_size
+        offset = (page_number - 1) * page_size
+
+        first_page = page_number == 1
+        last_page =  page_number == total_pages
+        empty_page = page_number > total_pages or page_number < 1
+
+        # Query data
+        vehicle_entities = vehicle_query.limit(page_size).offset(offset).all()
+
+        # Response
         vehicle_schema = VehicleSchema(many=True)
         vehicle_json = vehicle_schema.dump(vehicle_entities)
 
+        pagination = {
+            "offset": offset,
+            "page_number": page_number,
+            "page_size": page_size,
+            "total_pages": total_pages,
+            "total_elements": total_count,
+            "first_page": first_page,
+            "last_page": last_page,
+            "empty_page": empty_page
+        }
+
         return {
-            "vehicles": vehicle_json
+            "vehicles": vehicle_json,
+            "pageable": pagination
         }
     except ValidationError as e:
         abort(400, e.message)
