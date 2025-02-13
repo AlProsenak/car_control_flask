@@ -3,7 +3,7 @@ from flask import Blueprint, jsonify
 
 error_handler_bp = Blueprint('error_handler', __name__)
 
-# `app_errorhandler()` is global. For local custom error handler use `errorhandler()` inside the route.
+# For router local error handler use `errorhandler()` inside the router instead.
 @error_handler_bp.app_errorhandler(400)
 def bad_request(error):
     response = jsonify({
