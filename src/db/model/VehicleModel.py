@@ -4,6 +4,7 @@ from sqlalchemy import func, BigInteger, SmallInteger, DECIMAL, String
 from sqlalchemy.types import Enum as SQLEnum
 
 from src.extensions import db
+from src.util.ModelUtil import create_attribute_enum
 
 make_db_min_len = 1
 make_db_max_len = 20
@@ -87,3 +88,6 @@ class Vehicle(db.Model):
         vehicle = cls(make, model, year, fuel_type, door_count, price, currency_code)
         vehicle.id = id
         return vehicle
+
+
+VehicleAttributesEnum = create_attribute_enum(Vehicle, 'VehicleAttributesEnum')
