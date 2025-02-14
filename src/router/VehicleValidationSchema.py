@@ -5,12 +5,11 @@ from src.db.model.VehicleModel import (
     make_db_min_len, make_db_max_len, model_db_min_len, model_db_max_len, year_db_min,
     door_count_db_max, door_count_db_min, price_db_min, description_db_max_len, description_db_min_len
 )
-
-# REGEX
-regex_decimal_from_0_to_infinity = "^[0-9]+(\\.[0-9]+)?$"
-regex_integer_from_1_to_infinity = "^[1-9][0-9]*$"
-# Adjust `2` after `|` operator if higher top limit is desired. Example: `[2-9][0-9]{3}$` -> from 2000 to 9999
-regex_integer_from_1900_to_2999 = "^(19[0-9]{2}|2[0-9]{3})$"
+from src.util.Constant import (
+    regex_integer_from_1900_to_2999,
+    regex_decimal_from_0_to_infinity,
+    regex_integer_from_1_to_infinity
+)
 
 # VALIDATION SCHEMA ATTRIBUTES
 id_attribute = {
