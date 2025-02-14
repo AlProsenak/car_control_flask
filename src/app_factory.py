@@ -1,4 +1,5 @@
 from flask import Flask
+from flask_cors import CORS
 
 from .extensions import db, ma, migrate
 
@@ -10,11 +11,22 @@ def initialize(environment='local'):
 
     # Initialize environment configuration
     if environment == 'local':
-        app.config.from_object(LocalConfig)
+        config_object = LocalConfig()
     elif environment == 'development':
-        app.config.from_object(DevelopmentConfig)
+        config_object = DevelopmentConfig()
     else:
         raise ValueError('Invalid environment value: ' + environment)
+
+    app.config.from_object(config_object)
+
+    origins_str = config_object.CORS_ORIGINS
+    if origins_str:
+        # Parse and remove blank strings
+        allowed_origins = [origin.strip() for origin in origins_str.split(',') if origin.strip()]
+    else:
+        allowed_origins = []
+
+    CORS(app, origins=allowed_origins)
 
     print(f"Initializing application with environment: {environment}")
 
