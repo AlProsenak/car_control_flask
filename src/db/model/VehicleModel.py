@@ -1,6 +1,6 @@
-from datetime import datetime, timezone
 from enum import Enum
-from sqlalchemy import func, BigInteger, SmallInteger, DECIMAL, String
+
+from sqlalchemy import func, text, BigInteger, SmallInteger, DECIMAL, String
 from sqlalchemy.types import Enum as SQLEnum
 
 from src.extensions import db
@@ -48,8 +48,10 @@ class Vehicle(db.Model):
     currency_code = db.Column(SQLEnum(CurrencyCode), nullable=False)
     description = db.Column(String(description_db_max_len), nullable=True)
 
-    created_at = db.Column(db.DateTime, default=datetime.now(timezone.utc))
-    updated_at = db.Column(db.DateTime, default=datetime.now(timezone.utc), onupdate=datetime.now(timezone.utc))
+    created_at = db.Column(db.DateTime(timezone=True), server_default=func.now(), nullable=False)
+    # Approach `onupdate=datetime.now(timezone.utc)` or `onupdate=func.now()` did not work. Workaround fix:
+    # https://github.com/fastapi/sqlmodel/issues/252#issuecomment-2104569980
+    updated_at = db.Column(db.DateTime(timezone=True), server_default=text('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'), nullable=False)
 
     db.Index('idx_vehicle_make', make, unique=False)
     db.Index('idx_vehicle_model', model, unique=False)
