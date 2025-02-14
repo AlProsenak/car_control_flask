@@ -5,7 +5,7 @@
 services:
   mysql:
     image: mysql:9.2.0
-    container_name: ${DATABASE_CONTAINER_NAME}
+    container_name: ${MYSQL_CONTAINER_NAME}
     environment:
       MYSQL_DATABASE: carctrl
       MYSQL_USER: ${DATABASE_USERNAME}
@@ -16,11 +16,28 @@ services:
     volumes:
       - carctrl_mysql_volume:/var/lib/mysql
     networks:
-      - carctrl_mysql_network
+      - carctrl_network
+    restart: on-failure
+
+  mariadb:
+    image: mariadb:11.6.2
+    container_name: ${MARIADB_CONTAINER_NAME}
+    environment:
+      MARIADB_DATABASE: carctrl
+      MARIADB_USER: ${DATABASE_USERNAME}
+      MARIADB_PASSWORD: ${DATABASE_PASSWORD}
+      MARIADB_ROOT_PASSWORD: ${DATABASE_ROOT_PASSWORD}
+    ports:
+      - "3307:3306"
+    volumes:
+      - carctrl_mariadb_volume:/var/lib/mysql
+    networks:
+      - carctrl_network
     restart: on-failure
 
 volumes:
   carctrl_mysql_volume:
+  carctrl_mariadb_volume:
 
 networks:
-  carctrl_mysql_network:
+  carctrl_network:

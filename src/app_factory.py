@@ -3,7 +3,7 @@ from flask_cors import CORS
 
 from .extensions import db, ma, migrate
 
-from src.config.EnvironmentConfig import LocalConfig, DevelopmentConfig
+from src.config.EnvironmentConfig import LocalConfig, DevelopmentConfig, LocalMariaDBConfig
 
 
 def initialize(environment='local'):
@@ -12,6 +12,8 @@ def initialize(environment='local'):
     # Initialize environment configuration
     if environment == 'local':
         config_object = LocalConfig()
+    elif environment == 'local-mariadb':
+        config_object = LocalMariaDBConfig()
     elif environment == 'development':
         config_object = DevelopmentConfig()
     else:

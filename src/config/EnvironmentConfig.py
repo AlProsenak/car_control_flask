@@ -34,6 +34,24 @@ class LocalConfig(Config):
     SQLALCHEMY_DATABASE_URI = f"{DATABASE_DRIVER}://{DATABASE_USERNAME}:{DATABASE_PASSWORD}@{DATABASE_HOST}:{DATABASE_PORT}/{DATABASE_NAME}"
 
 
+class LocalMariaDBConfig(Config):
+    FLASK_ENV = os.getenv('FLASK_ENV', 'local-mariadb')
+    SECRET_KEY = os.getenv('SECRET_KEY', 'local_secret_key')
+    CORS_ORIGINS = os.getenv('CORS_ORIGINS', '*')
+    DEBUG = os.getenv('DEBUG', True)
+    FLASK_DEBUG = os.getenv('FLASK_DEBUG', 1)
+    DATABASE_DRIVER = os.getenv('DATABASE_DRIVER', 'mariadb+mariadbconnector')
+    DATABASE_USERNAME = os.getenv('DATABASE_USERNAME', 'localuser')
+    DATABASE_PASSWORD = os.getenv('DATABASE_PASSWORD', 'localpassword')
+    # TODO: check why socket connector is used:
+    #  https://stackoverflow.com/questions/4448467/cant-connect-to-local-mysql-server-through-socket-var-lib-mysql-mysql-sock
+    # DATABASE_HOST = os.getenv('DATABASE_HOST', 'localhost')
+    DATABASE_HOST = os.getenv('DATABASE_HOST', '127.0.0.1')
+    DATABASE_PORT = os.getenv('DATABASE_PORT', '3307')
+    DATABASE_NAME = os.getenv('DATABASE_NAME', 'carctrl')
+    SQLALCHEMY_DATABASE_URI = f"{DATABASE_DRIVER}://{DATABASE_USERNAME}:{DATABASE_PASSWORD}@{DATABASE_HOST}:{DATABASE_PORT}/{DATABASE_NAME}"
+
+
 class DevelopmentConfig(Config):
     FLASK_ENV = os.getenv('FLASK_ENV', 'local')
     SECRET_KEY = os.getenv('SECRET_KEY', 'local_secret_key')
