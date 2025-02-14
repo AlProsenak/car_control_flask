@@ -1,5 +1,6 @@
 from datetime import datetime
 from flask import Blueprint, request, abort
+from flask_cors import cross_origin
 from jsonschema import validate
 from jsonschema.exceptions import ValidationError
 from sqlalchemy import asc, desc, and_
@@ -14,6 +15,7 @@ from src.router.VehicleValidationSchema import get_vehicle_validation_schema, cr
 vehicle_router_bp = Blueprint('vehicle_router', __name__)
 
 
+@cross_origin()
 @vehicle_router_bp.route('/api/v1/vehicle', methods=['GET'])
 def get_vehicles():
     try:
@@ -94,6 +96,7 @@ def get_vehicles():
         abort(400, e.message)
 
 
+@cross_origin()
 @vehicle_router_bp.route('/api/v1/vehicle/<int:id>', methods=['GET'])
 def get_vehicle(id: int):
     vehicle_entity = Vehicle.query.get(id)
@@ -109,6 +112,7 @@ def get_vehicle(id: int):
     }
 
 
+@cross_origin()
 @vehicle_router_bp.route('/api/v1/vehicle', methods=['POST'])
 def create_vehicle():
     try:
@@ -134,6 +138,7 @@ def create_vehicle():
         abort(400, e.message)
 
 
+@cross_origin()
 @vehicle_router_bp.route('/api/v1/vehicle', methods=['PUT'])
 def update_vehicle():
     try:
@@ -173,6 +178,7 @@ def update_vehicle():
         abort(400, e.message)
 
 
+@cross_origin()
 @vehicle_router_bp.route('/api/v1/vehicle/<int:id>', methods=['DELETE'])
 def delete_vehicle(id: int):
     vehicle_entity = Vehicle.query.get(id)
