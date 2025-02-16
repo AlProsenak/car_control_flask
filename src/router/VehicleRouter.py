@@ -11,6 +11,7 @@ from src.db.model.VehicleModel import Vehicle
 from src.db.schema.VehicleSchema import VehicleSchema
 from src.router.VehicleValidationSchema import get_vehicle_validation_schema, create_vehicle_validation_schema, \
     update_vehicle_validation_schema
+from src.util.RouterUtil import create_filters, create_pagination
 
 vehicle_router_bp = Blueprint('vehicle_router', __name__)
 
@@ -21,34 +22,16 @@ def get_vehicles():
     try:
         validate(request.args, get_vehicle_validation_schema)
 
-        vehicle_query = Vehicle.query
-
         # Filter
         # TODO: refactor query parameters and filters to also work with lists
-        # TODO: custom constraint validation for numeric query parameters (year, price)
-        filters = []
+        # TODO: custom constraint validation for numeric query parameters (year, price) - currently regex is doing half the work
         query_params = request.args.to_dict()
-        if 'make' in query_params:
-            filters.append(Vehicle.make == query_params['make'])
-        if 'make_like' in query_params:
-            filters.append(Vehicle.make.ilike(f"%{query_params['make_like']}%"))
-        if 'model' in query_params:
-            filters.append(Vehicle.model == query_params['model'])
-        if 'model_like' in query_params:
-            filters.append(Vehicle.model.ilike(f"%{query_params['model_like']}%"))
-        if 'year_min' in query_params:
-            filters.append(Vehicle.year >= query_params['year_min'])
-        if 'year_max' in query_params:
-            filters.append(Vehicle.year <= query_params['year_max'])
-        if 'price_min' in query_params:
-            filters.append(Vehicle.price >= query_params['price_min'])
-        if 'price_max' in query_params:
-            filters.append(Vehicle.price <= query_params['price_max'])
-        if 'currency_code' in query_params:
-            filters.append(Vehicle.currency_code == query_params['currency_code'])
 
-        if filters:
-            vehicle_query = vehicle_query.filter(and_(*filters))
+        vehicle_query = Vehicle.query
+
+        # Filters
+        filters = create_filters(Vehicle, query_params)
+        vehicle_query = vehicle_query.filter(and_(*filters))
 
         # Sort
         sort_by = query_params.get('sort_by', 'id').lower()
@@ -59,35 +42,14 @@ def get_vehicles():
             vehicle_query = vehicle_query.order_by(asc(getattr(Vehicle, sort_by)))
 
         # Pagination
-        page_number = int(request.args.get('page_number', 1))
-        page_size = int(request.args.get('page_size', 10))
-
-        total_count = vehicle_query.count()
-        total_pages = (total_count + page_size - 1) // page_size
-        offset = (page_number - 1) * page_size
-
-        first_page = page_number == 1
-        last_page = page_number == total_pages
-        empty_page = page_number > total_pages or page_number < 1
+        pagination = create_pagination(Vehicle, query_params)
 
         # Query data
-        vehicle_entities = vehicle_query.limit(page_size).offset(offset).all()
+        vehicle_entities = vehicle_query.limit(pagination['page_size']).offset(pagination['offset']).all()
 
         # Response
         vehicle_schema = VehicleSchema(many=True)
         vehicle_json = vehicle_schema.dump(vehicle_entities)
-
-        pagination = {
-            "offset": offset,
-            "page_number": page_number,
-            "page_size": page_size,
-            "total_pages": total_pages,
-            "total_elements": total_count,
-            "first_page": first_page,
-            "last_page": last_page,
-            "empty_page": empty_page
-        }
-
         return {
             "vehicles": vehicle_json,
             "pageable": pagination
