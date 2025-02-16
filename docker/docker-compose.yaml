@@ -35,9 +35,35 @@ services:
       - carctrl_network
     restart: on-failure
 
+  postgres:
+    image: postgres:17.3-alpine
+    container_name: carctrl_keycloak_db
+    environment:
+      POSTGRES_DB: keycloak
+      POSTGRES_USER: keycloak
+      POSTGRES_PASSWORD: keycloak
+    volumes:
+      - postgres_keycloak_volume:/var/lib/postgresql/data
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.1
+    container_name: carctrl_keycloak
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://postgres/keycloak
+      KC_DB_USERNAME: keycloak
+      KC_DB_PASSWORD: keycloak
+    ports:
+      - "8443:8080"
+    command:
+      - start-dev
+
 volumes:
   carctrl_mysql_volume:
   carctrl_mariadb_volume:
+  postgres_keycloak_volume:
 
 networks:
   carctrl_network:

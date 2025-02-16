@@ -1,4 +1,7 @@
+from datetime import datetime
 from typing import Any
+
+from flask import jsonify, Response
 
 from src.extensions import db
 
@@ -52,3 +55,11 @@ def create_pagination(model: db.Model, query_params: dict[str, str], default_pag
         "empty_page": empty_page
     }
     return pagination
+
+
+def create_error_response(status_code: int, message: str) -> tuple[Response, int]:
+    return jsonify({
+        "status": status_code,
+        "message": message,
+        "timestamp": datetime.now().isoformat()
+    }), status_code
