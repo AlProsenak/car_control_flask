@@ -2,11 +2,12 @@ from datetime import datetime
 from typing import Any
 
 from flask import jsonify, Response
+from sqlalchemy import and_, BinaryExpression
 
 from src.extensions import db
 
 
-def create_filters(model: db.Model, query_params: dict[str, str]) -> list[bool]:
+def create_filters(model: db.Model, query_params: dict[str, str]) -> list[BinaryExpression]:
     filters = []
     for param, value in query_params.items():
         parts = param.split('_')
@@ -31,12 +32,13 @@ def create_filters(model: db.Model, query_params: dict[str, str]) -> list[bool]:
     return filters
 
 
-def create_pagination(model: db.Model, query_params: dict[str, str], default_page_number=1, default_page_size=10) \
+def create_pagination(model: db.Model, query_params: dict[str, str], filters: list[BinaryExpression],
+                      default_page_number=1, default_page_size=10) \
         -> dict[str, int | bool | Any]:
     page_number = int(query_params.get('page_number', default_page_number))
     page_size = int(query_params.get('page_size', default_page_size))
 
-    total_count = model.query.count()
+    total_count = model.query.filter(and_(*filters)).count()
     total_pages = (total_count + page_size - 1) // page_size
     offset = (page_number - 1) * page_size
 

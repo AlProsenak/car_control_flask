@@ -43,7 +43,7 @@ def get_vehicles():
             vehicle_query = vehicle_query.order_by(asc(getattr(Vehicle, sort_by)))
 
         # Pagination
-        pagination = create_pagination(Vehicle, query_params)
+        pagination = create_pagination(Vehicle, query_params, filters)
 
         # Query data
         vehicle_entities = vehicle_query.limit(pagination['page_size']).offset(pagination['offset']).all()
