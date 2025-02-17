@@ -4,6 +4,8 @@ from sqlalchemy import text, inspect
 
 from src.extensions import db
 
+SQL_FILE_SUFFIX = '_table.sql'
+
 
 class TableNotFoundError(Exception):
     """Custom exception for when a table does not exist."""
@@ -17,8 +19,9 @@ def initialize_test_data(test_data_dir='test_data', force_insert=False):
 
     for filename in os.listdir(test_data_dir):
         if filename.endswith('.sql'):
+            # TODO: add priority of execution mechanism in case of table dependencies (for example: foreign keys)
             try:
-                filename_table_prefix = filename.split('_')[0]
+                filename_table_prefix = filename.split(SQL_FILE_SUFFIX)[0]
                 existing_tables = inspect(db.engine).get_table_names()
 
                 if filename_table_prefix not in existing_tables:
