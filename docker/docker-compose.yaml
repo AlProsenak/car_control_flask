@@ -4,13 +4,13 @@
 
 services:
   mysql:
-    image: mysql:9.2.0
+    image: mysql:${MYSQL_VERSION}
     container_name: ${MYSQL_CONTAINER_NAME}
     environment:
       MYSQL_DATABASE: carctrl
       MYSQL_USER: ${DATABASE_USERNAME}
       MYSQL_PASSWORD: ${DATABASE_PASSWORD}
-      MYSQL_ROOT_PASSWORD: ${DATABASE_ADMIN}
+      MYSQL_ROOT_PASSWORD: ${DATABASE_ROOT_PASSWORD}
     ports:
       - "3306:3306"
     volumes:
@@ -20,7 +20,7 @@ services:
     restart: on-failure
 
   mariadb:
-    image: mariadb:11.6.2
+    image: mariadb:${MARIADB_VERSION}
     container_name: ${MARIADB_CONTAINER_NAME}
     environment:
       MARIADB_DATABASE: carctrl
@@ -36,30 +36,30 @@ services:
     restart: on-failure
 
   postgres:
-    image: postgres:17.3-alpine
-    container_name: carctrl_keycloak_db
+    image: postgres:${POSTGRES_VERSION}
+    container_name: ${KEYCLOAK_DB_CONTAINER_NAME}
     environment:
-      POSTGRES_DB: keycloak
-      POSTGRES_USER: keycloak
-      POSTGRES_PASSWORD: keycloak
+      POSTGRES_DB: ${KEYCLOAK_DB_NAME}
+      POSTGRES_USER: ${KEYCLOAK_DB_USERNAME}
+      POSTGRES_PASSWORD: ${KEYCLOAK_DB_PASSWORD}
     volumes:
       - carctrl_keycloak_db_volume:/var/lib/postgresql/data
     restart: on-failure
 
   keycloak:
-    image: quay.io/keycloak/keycloak:26.1.2
-    container_name: carctrl_keycloak
+    image: quay.io/keycloak/keycloak:${KEYCLOAK_VERSION}
+    container_name: ${KEYCLOAK_CONTAINER_NAME}
     environment:
       # Deprecated according to Keycloak container logs
-#      KEYCLOAK_ADMIN: admin
-      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+#      KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN_USERNAME}
+      KC_BOOTSTRAP_ADMIN_USERNAME: ${KEYCLOAK_ADMIN_USERNAME}
       # Deprecated according to Keycloak container logs
-#      KEYCLOAK_ADMIN_PASSWORD: admin
-      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
+#      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
+      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
       KC_DB: postgres
-      KC_DB_URL: jdbc:postgresql://postgres/keycloak
-      KC_DB_USERNAME: keycloak
-      KC_DB_PASSWORD: keycloak
+      KC_DB_URL: jdbc:postgresql://postgres/${KEYCLOAK_DB_NAME}
+      KC_DB_USERNAME: ${KEYCLOAK_DB_USERNAME}
+      KC_DB_PASSWORD: ${KEYCLOAK_DB_PASSWORD}
       # Enables importing realms, without needing to remove "js" policies from the JSON export.
       # TODO: deprecated in version 18. Find workaround without needing to remove "js" policies
       #  https://github.com/keycloak/keycloak/issues/15869
