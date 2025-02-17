@@ -3,6 +3,7 @@ import os
 from flask_migrate import upgrade
 
 from src import app_factory
+from src.auth.Decorator import jwt_required_custom
 from src.router.ErrorHandler import error_handler_bp
 from src.router.VehicleRouter import vehicle_router_bp
 from src.util.TestDataGenerator import initialize_test_data

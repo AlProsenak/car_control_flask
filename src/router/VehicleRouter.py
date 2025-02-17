@@ -5,6 +5,7 @@ from jsonschema import validate
 from jsonschema.exceptions import ValidationError
 from sqlalchemy import asc, desc, and_
 
+from src.auth.Decorator import jwt_required_custom
 from src.extensions import db
 
 from src.db.model.VehicleModel import Vehicle
@@ -76,6 +77,7 @@ def get_vehicle(id: int):
 
 @cross_origin()
 @vehicle_router_bp.route('/api/v1/vehicle', methods=['POST'])
+@jwt_required_custom()
 def create_vehicle():
     try:
         request_data = request.get_json()
@@ -102,6 +104,7 @@ def create_vehicle():
 
 @cross_origin()
 @vehicle_router_bp.route('/api/v1/vehicle', methods=['PUT'])
+@jwt_required_custom()
 def update_vehicle():
     try:
         request_data = request.get_json()
@@ -142,6 +145,7 @@ def update_vehicle():
 
 @cross_origin()
 @vehicle_router_bp.route('/api/v1/vehicle/<int:id>', methods=['DELETE'])
+@jwt_required_custom()
 def delete_vehicle(id: int):
     vehicle_entity = Vehicle.query.get(id)
 

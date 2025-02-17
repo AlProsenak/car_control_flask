@@ -1,26 +1,29 @@
 from flask import Flask
 from flask_cors import CORS
 
-from .extensions import db, ma, migrate
-
-from src.config.EnvironmentConfig import LocalConfig, DevelopmentConfig, LocalMariaDBConfig
+from .auth.Security import get_iam_certificate
+from .extensions import db, ma, migrate, jwt, config
 
 
 def initialize(environment='local'):
     app = Flask(__name__)
 
-    # Initialize environment configuration
-    if environment == 'local':
-        config_object = LocalConfig()
-    elif environment == 'local-mariadb':
-        config_object = LocalMariaDBConfig()
-    elif environment == 'development':
-        config_object = DevelopmentConfig()
-    else:
-        raise ValueError('Invalid environment value: ' + environment)
+    config.init_config(environment)
+    config_object = config.get_instance()
 
     app.config.from_object(config_object)
 
+    # Configure security
+    public_certificate = get_iam_certificate()
+    if not public_certificate:
+        print("Failed to load IAM public key. JWT authentication will not work.")
+        exit(1)
+
+    app.config['JWT_ALGORITHM'] = public_certificate['algorithm']
+    app.config['JWT_PUBLIC_KEY'] = public_certificate['certificate']
+    app.config['JWT_SECRET_KEY'] = app.config['SECRET_KEY']
+
+    # Configure CORS
     origins_str = config_object.CORS_ORIGINS
     if origins_str:
         # Parse and remove blank strings
@@ -30,12 +33,12 @@ def initialize(environment='local'):
 
     CORS(app, origins=allowed_origins)
 
-    print(f"Initializing application with environment: {environment}")
-
     # Initialize extensions
     db.init_app(app)
     ma.init_app(app)
-    # Initialize Flask-Migrate extension, which allows for `flask db` migration commands to be run
     migrate.init_app(app, db, directory='src/db/migration')
+    jwt.init_app(app)
+
+    print(f"Initialized application with environment: {environment}")
 
     return app

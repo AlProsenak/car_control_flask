@@ -1,34 +1,20 @@
-from datetime import datetime
-from flask import Blueprint, jsonify
+from flask import Blueprint
+
+from src.util.RouterUtil import create_error_response
 
 error_handler_bp = Blueprint('error_handler', __name__)
 
 # For router local error handler use `errorhandler()` inside the router instead.
 @error_handler_bp.app_errorhandler(400)
 def bad_request(error):
-    response = jsonify({
-        "status": 400,
-        "message": error.description,
-        "timestamp": datetime.now().isoformat()
-    }), 400
-    return response
+    return create_error_response(400, error.description)
 
 
 @error_handler_bp.app_errorhandler(404)
 def not_found(error):
-    response = jsonify({
-        "status": 404,
-        "message": error.description,
-        "timestamp": datetime.now().isoformat()
-    }), 404
-    return response
+    return create_error_response(404, error.description)
 
 
 @error_handler_bp.app_errorhandler(500)
 def internal_server_error(error):
-    response = jsonify({
-        "status": 500,
-        "message": error.description,
-        "timestamp": datetime.now().isoformat()
-    }), 500
-    return response
+    return create_error_response(500, error.description)
