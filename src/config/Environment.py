@@ -15,6 +15,9 @@ LOCAL_KEYCLOAK_CLIENT_SECRET = 'B5QemoHBZuDBNmhWv2OuzV1BiFeVQ5QC'
 LOCAL_KEYCLOAK_CERTS_URL = f"{LOCAL_KEYCLOAK_URL}/realms/{LOCAL_KEYCLOAK_REALM}/protocol/openid-connect/certs"
 LOCAL_KEYCLOAK_INTROSPECTION_URL = f"{LOCAL_KEYCLOAK_URL}/realms/{LOCAL_KEYCLOAK_REALM}/protocol/openid-connect/token/introspect"
 
+DOCKER_DATABASE_HOST = "mysql"
+DOCKER_KEYCLOAK_URL = "http://keycloak:8080"
+
 
 class BaseEnvironment:
     """Environment configuration placeholder"""
@@ -36,6 +39,8 @@ class BaseEnvironment:
     KEYCLOAK_CLIENT_SECRET = os.getenv('KEYCLOAK_CLIENT_SECRET', None)
     KEYCLOAK_INTROSPECTION_URL = f"{KEYCLOAK_URL}/realms/{KEYCLOAK_REALM}/protocol/openid-connect/token/introspect"
     KEYCLOAK_CERTS_URL = f"{KEYCLOAK_URL}/realms/{KEYCLOAK_REALM}/protocol/openid-connect/certs"
+
+    # TODO: implement proper handling of missing environment variables and logs
 
 
 class LocalEnvironment(BaseEnvironment):
@@ -83,23 +88,44 @@ class LocalMariaDBEnvironment(BaseEnvironment):
     KEYCLOAK_CERTS_URL = f"{KEYCLOAK_URL}/realms/{KEYCLOAK_REALM}/protocol/openid-connect/certs"
 
 
+class DockerEnvironment(BaseEnvironment):
+    FLASK_ENV = os.getenv('FLASK_ENV', 'docker')
+    SECRET_KEY = os.getenv('SECRET_KEY', 'docker_secret_key')
+    CORS_ORIGINS = os.getenv('CORS_ORIGINS', '*')
+    DEBUG = os.getenv('DEBUG', False)
+    FLASK_DEBUG = os.getenv('FLASK_DEBUG', 0)
+    DATABASE_DRIVER = os.getenv('DATABASE_DRIVER', 'mysql+mysqlconnector')
+    DATABASE_USERNAME = os.getenv('DATABASE_USERNAME', LOCAL_DATABASE_USERNAME)
+    DATABASE_PASSWORD = os.getenv('DATABASE_PASSWORD', LOCAL_DATABASE_PASSWORD)
+    DATABASE_HOST = os.getenv('DATABASE_HOST', DOCKER_DATABASE_HOST)  # Adjusted for hostname when running in docker
+    DATABASE_PORT = os.getenv('DATABASE_PORT', '3306')
+    DATABASE_NAME = os.getenv('DATABASE_NAME', LOCAL_DATABASE_NAME)
+    SQLALCHEMY_DATABASE_URI = f"{DATABASE_DRIVER}://{DATABASE_USERNAME}:{DATABASE_PASSWORD}@{DATABASE_HOST}:{DATABASE_PORT}/{DATABASE_NAME}"
+    KEYCLOAK_URL = os.getenv('KEYCLOAK_URL', DOCKER_KEYCLOAK_URL)  # Adjusted for hostname when running in docker
+    KEYCLOAK_REALM = os.getenv('KEYCLOAK_REALM', LOCAL_KEYCLOAK_REALM)
+    KEYCLOAK_CLIENT_ID = os.getenv('KEYCLOAK_CLIENT_ID', LOCAL_KEYCLOAK_CLIENT_ID)
+    KEYCLOAK_CLIENT_SECRET = os.getenv('KEYCLOAK_CLIENT_SECRET', LOCAL_KEYCLOAK_CLIENT_SECRET)
+    KEYCLOAK_INTROSPECTION_URL = f"{KEYCLOAK_URL}/realms/{KEYCLOAK_REALM}/protocol/openid-connect/token/introspect"
+    KEYCLOAK_CERTS_URL = f"{KEYCLOAK_URL}/realms/{KEYCLOAK_REALM}/protocol/openid-connect/certs"
+
+
 # Just an example placeholder. With current setup it will not work.
-class DevelopmentEnvironment(BaseEnvironment):
-    FLASK_ENV = os.getenv('FLASK_ENV', 'development')
-    SECRET_KEY = os.getenv('SECRET_KEY', 'development_secret_key')
+class ProductionEnvironment(BaseEnvironment):
+    FLASK_ENV = os.getenv('FLASK_ENV', 'production')
+    SECRET_KEY = os.getenv('SECRET_KEY', None)
     CORS_ORIGINS = os.getenv('CORS_ORIGINS', 'http://localhost:3000,http://localhost:5173')
     DEBUG = os.getenv('DEBUG', False)
     FLASK_DEBUG = os.getenv('FLASK_DEBUG', 0)
     DATABASE_DRIVER = os.getenv('DATABASE_DRIVER', 'mysql+mysqlconnector')
-    DATABASE_USERNAME = os.getenv('DATABASE_USERNAME', 'developmentuser')
-    DATABASE_PASSWORD = os.getenv('DATABASE_PASSWORD', 'developmentpassword')
-    DATABASE_HOST = os.getenv('DATABASE_HOST', 'localhost')
-    DATABASE_PORT = os.getenv('DATABASE_PORT', '3306')
-    DATABASE_NAME = os.getenv('DATABASE_NAME', 'carctrl')
+    DATABASE_USERNAME = os.getenv('DATABASE_USERNAME', None)
+    DATABASE_PASSWORD = os.getenv('DATABASE_PASSWORD', None)
+    DATABASE_HOST = os.getenv('DATABASE_HOST', None)
+    DATABASE_PORT = os.getenv('DATABASE_PORT', None)
+    DATABASE_NAME = os.getenv('DATABASE_NAME', None)
     SQLALCHEMY_DATABASE_URI = f"{DATABASE_DRIVER}://{DATABASE_USERNAME}:{DATABASE_PASSWORD}@{DATABASE_HOST}:{DATABASE_PORT}/{DATABASE_NAME}"
-    KEYCLOAK_URL = os.getenv('KEYCLOAK_URL', LOCAL_KEYCLOAK_URL)
-    KEYCLOAK_REALM = os.getenv('KEYCLOAK_REALM', LOCAL_KEYCLOAK_REALM)
-    KEYCLOAK_CLIENT_ID = os.getenv('KEYCLOAK_CLIENT_ID', LOCAL_KEYCLOAK_CLIENT_ID)
-    KEYCLOAK_CLIENT_SECRET = os.getenv('KEYCLOAK_CLIENT_SECRET', LOCAL_KEYCLOAK_CLIENT_SECRET)
+    KEYCLOAK_URL = os.getenv('KEYCLOAK_URL', None)
+    KEYCLOAK_REALM = os.getenv('KEYCLOAK_REALM', None)
+    KEYCLOAK_CLIENT_ID = os.getenv('KEYCLOAK_CLIENT_ID', None)
+    KEYCLOAK_CLIENT_SECRET = os.getenv('KEYCLOAK_CLIENT_SECRET', None)
     KEYCLOAK_INTROSPECTION_URL = f"{KEYCLOAK_URL}/realms/{KEYCLOAK_REALM}/protocol/openid-connect/token/introspect"
     KEYCLOAK_CERTS_URL = f"{KEYCLOAK_URL}/realms/{KEYCLOAK_REALM}/protocol/openid-connect/certs"

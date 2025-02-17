@@ -1,4 +1,4 @@
-from src.config.Environment import LocalMariaDBEnvironment, LocalEnvironment, DevelopmentEnvironment
+from src.config.Environment import LocalMariaDBEnvironment, LocalEnvironment, ProductionEnvironment, DockerEnvironment
 
 
 class AppConfig:
@@ -15,8 +15,10 @@ class AppConfig:
             self._config_instance = LocalEnvironment()
         elif environment == 'local-mariadb':
             self._config_instance = LocalMariaDBEnvironment()
-        elif environment == 'development':
-            self._config_instance = DevelopmentEnvironment()
+        elif environment == 'docker':
+            self._config_instance = DockerEnvironment()
+        elif environment == 'production':
+            self._config_instance = ProductionEnvironment()
         else:
             raise ValueError('Invalid environment value: ' + environment)
         return self._config_instance

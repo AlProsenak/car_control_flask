@@ -44,6 +44,8 @@ services:
       POSTGRES_PASSWORD: ${KEYCLOAK_DB_PASSWORD}
     volumes:
       - carctrl_keycloak_db_volume:/var/lib/postgresql/data
+    networks:
+      - carctrl_network
     restart: on-failure
 
   keycloak:
@@ -68,6 +70,9 @@ services:
       - "8443:8080"
     volumes:
       - ./keycloak/car-control-realm.json:/opt/keycloak/data/import/car-control-realm.json
+    # Add network for dockerized application being able to connect to Keycloak
+    networks:
+      - carctrl_network
     entrypoint: "/opt/keycloak/bin/kc.sh start-dev --import-realm"
     # OR
 #    command:

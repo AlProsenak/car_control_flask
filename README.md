@@ -90,7 +90,7 @@ systemctl enable docker
    ```shell
    docker run --name ${CONTAINER_NAME} \ 
    -p ${HOST_MACHINE_PORT}:5000 \
-   -e DATABASE_HOST=mysql \
+   -e FLASK_ENV=docker \
    --network docker_carctrl_network \
    ${IMAGE_NAME}:${IMAGE_VERSION} \
    -d
@@ -98,8 +98,11 @@ systemctl enable docker
 
    Mandatory:
     - port
-    - database host
+    - Flask environment variable
     - network (check with `docker network ls`)
+
+> By setting the environment variable `FLASK_ENV=docker`, the application will automatically configure itself to
+> successfully connect to the correct hostnames within the Docker network stack.
 
 ---
 
@@ -113,7 +116,7 @@ systemctl enable docker
 ## 🔐 API Overview 🔐
 
 > ⚠️There is included Postman export file with all locally configured endpoints, including Keycloak ⚠️  
-> File location: `./postman/car_control_local.postman_collection.json` 
+> File location: `./postman/car_control_local.postman_collection.json`
 
 > TODO: OpenAPI specification and Swagger implementation
 
