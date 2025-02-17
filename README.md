@@ -112,6 +112,9 @@ systemctl enable docker
 
 ## 🔐 API Overview 🔐
 
+> ⚠️There is included Postman export file with all locally configured endpoints, including Keycloak ⚠️  
+> File location: `./postman/car_control_local.postman_collection.json` 
+
 > TODO: OpenAPI specification and Swagger implementation
 
 ### Get vehicle data

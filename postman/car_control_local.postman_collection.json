@@ -1,0 +1,551 @@
+{
+	"info": {
+		"_postman_id": "189bf905-c2b9-44db-be57-8ef5c2038b55",
+		"name": "Car Control",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "18747939"
+	},
+	"item": [
+		{
+			"name": "Keycloak",
+			"item": [
+				{
+					"name": "Get certs",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8443/realms/car-control/protocol/openid-connect/certs",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8443",
+							"path": [
+								"realms",
+								"car-control",
+								"protocol",
+								"openid-connect",
+								"certs"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Client Login BE",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/x-www-form-urlencoded",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "grant_type",
+									"value": "client_credentials",
+									"type": "text"
+								},
+								{
+									"key": "client_id",
+									"value": "car-control-be",
+									"type": "text"
+								},
+								{
+									"key": "client_secret",
+									"value": "B5QemoHBZuDBNmhWv2OuzV1BiFeVQ5QC",
+									"type": "text"
+								},
+								{
+									"key": "client_id",
+									"value": "car-control-ui",
+									"description": "For testing - should not work",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "client_secret",
+									"value": "S0r2oWEO111J909JORlJbcynOWaMmTou",
+									"description": "For testing - should not work",
+									"type": "text",
+									"disabled": true
+								}
+							]
+						},
+						"url": {
+							"raw": "http://localhost:8443/realms/car-control/protocol/openid-connect/token",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8443",
+							"path": [
+								"realms",
+								"car-control",
+								"protocol",
+								"openid-connect",
+								"token"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "User Login BE",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/x-www-form-urlencoded",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "grant_type",
+									"value": "password",
+									"type": "text"
+								},
+								{
+									"key": "client_id",
+									"value": "car-control-be",
+									"type": "text"
+								},
+								{
+									"key": "client_secret",
+									"value": "B5QemoHBZuDBNmhWv2OuzV1BiFeVQ5QC",
+									"type": "text"
+								},
+								{
+									"key": "username",
+									"value": "testuser",
+									"type": "text"
+								},
+								{
+									"key": "password",
+									"value": "testpassword",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "http://localhost:8443/realms/car-control/protocol/openid-connect/token",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8443",
+							"path": [
+								"realms",
+								"car-control",
+								"protocol",
+								"openid-connect",
+								"token"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "User Login UI",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/x-www-form-urlencoded",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "grant_type",
+									"value": "password",
+									"type": "text"
+								},
+								{
+									"key": "client_id",
+									"value": "car-control-ui",
+									"type": "text"
+								},
+								{
+									"key": "client_secret",
+									"value": "S0r2oWEO111J909JORlJbcynOWaMmTou",
+									"type": "text"
+								},
+								{
+									"key": "username",
+									"value": "testuser",
+									"type": "text"
+								},
+								{
+									"key": "password",
+									"value": "testpassword",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "http://localhost:8443/realms/car-control/protocol/openid-connect/token",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8443",
+							"path": [
+								"realms",
+								"car-control",
+								"protocol",
+								"openid-connect",
+								"token"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "User Logout UI",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/x-www-form-urlencoded",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "client_id",
+									"value": "car-control-ui",
+									"type": "text"
+								},
+								{
+									"key": "client_secret",
+									"value": "S0r2oWEO111J909JORlJbcynOWaMmTou",
+									"type": "text"
+								},
+								{
+									"key": "refresh_token",
+									"value": "eyJhbGciOiJIUzUxMiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJlMWE5ZTZmZS0wNGJhLTQ4ZWEtYjVjNy0xYWExOTBhZmQ1MWQifQ.eyJleHAiOjE3Mzk3OTY0NDgsImlhdCI6MTczOTc5NDY0OCwianRpIjoiZWFiYTFjZTYtNzc5NC00NTFiLWFjMTQtNTEzOTBkYmFhNzg4IiwiaXNzIjoiaHR0cDovL2xvY2FsaG9zdDo4NDQzL3JlYWxtcy9jYXItY29udHJvbCIsImF1ZCI6Imh0dHA6Ly9sb2NhbGhvc3Q6ODQ0My9yZWFsbXMvY2FyLWNvbnRyb2wiLCJzdWIiOiI2ZTFjNWYwMS1jNTIyLTQwZDUtYjk4ZC04MDUxNzljY2MyZjAiLCJ0eXAiOiJSZWZyZXNoIiwiYXpwIjoiY2FyLWNvbnRyb2wtdWkiLCJzaWQiOiI5YjM0NzVhMi00MDlmLTRjNTItOGJiNy1hYjc5Yjc4OTk5N2YiLCJzY29wZSI6IndlYi1vcmlnaW5zIGJhc2ljIGVtYWlsIGFjciBwcm9maWxlIHJvbGVzIn0.CkNwI5HMSk6ru50XSIutU3amRfHtZVnXWgbLPu9caoa262oH_dqgMN5yoHAc7eIuG5mhN8AarNcGu8UtfpphAQ",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "http://localhost:8443/realms/car-control/protocol/openid-connect/logout",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8443",
+							"path": [
+								"realms",
+								"car-control",
+								"protocol",
+								"openid-connect",
+								"logout"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Introspect Token BE",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "client_id",
+									"value": "car-control-be",
+									"type": "text"
+								},
+								{
+									"key": "client_secret",
+									"value": "B5QemoHBZuDBNmhWv2OuzV1BiFeVQ5QC",
+									"type": "text"
+								},
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICI3aHI4bFFtT2VSNVpTWFprMTJZdzZTN2hhNVRZR1JuZnJId1d1cGFRVUQ0In0.eyJleHAiOjE3Mzk3OTQ5NDgsImlhdCI6MTczOTc5NDY0OCwianRpIjoiNjFlZmY1NjAtYjljYS00MjRmLWI5MTEtMTE1NmRhNjQ2YmFiIiwiaXNzIjoiaHR0cDovL2xvY2FsaG9zdDo4NDQzL3JlYWxtcy9jYXItY29udHJvbCIsImF1ZCI6WyJjYXItY29udHJvbC1iZSIsImFjY291bnQiXSwic3ViIjoiNmUxYzVmMDEtYzUyMi00MGQ1LWI5OGQtODA1MTc5Y2NjMmYwIiwidHlwIjoiQmVhcmVyIiwiYXpwIjoiY2FyLWNvbnRyb2wtdWkiLCJzaWQiOiI5YjM0NzVhMi00MDlmLTRjNTItOGJiNy1hYjc5Yjc4OTk5N2YiLCJhY3IiOiIxIiwiYWxsb3dlZC1vcmlnaW5zIjpbImh0dHA6Ly9sb2NhbGhvc3Q6ODA4MCJdLCJyZWFsbV9hY2Nlc3MiOnsicm9sZXMiOlsiZGVmYXVsdC1yb2xlcy1jYXItY29udHJvbCIsIm9mZmxpbmVfYWNjZXNzIiwidW1hX2F1dGhvcml6YXRpb24iXX0sInJlc291cmNlX2FjY2VzcyI6eyJjYXItY29udHJvbC1iZSI6eyJyb2xlcyI6WyJ1bWFfcHJvdGVjdGlvbiJdfSwiYWNjb3VudCI6eyJyb2xlcyI6WyJtYW5hZ2UtYWNjb3VudCIsIm1hbmFnZS1hY2NvdW50LWxpbmtzIiwidmlldy1wcm9maWxlIl19fSwic2NvcGUiOiJlbWFpbCBwcm9maWxlIiwiZW1haWxfdmVyaWZpZWQiOmZhbHNlLCJuYW1lIjoiVGVzdCBVc2VyIiwicHJlZmVycmVkX3VzZXJuYW1lIjoidGVzdHVzZXIiLCJnaXZlbl9uYW1lIjoiVGVzdCIsImZhbWlseV9uYW1lIjoiVXNlciIsImVtYWlsIjoidGVzdHVzZXJAZ21haWwuY29tIn0.LgyGqq58WXWDUMRQrzE4WdACvKX3uExJGfCB-m2KzqdTN425VMq9a5Al-jW_D_U2af8ATpjpVD50TeIN62Mf-npoBRn-7TAcHkoM_YkAACJFXsQCIhe3QIyG8SIXo0QnIvOpPx9F05B1Bx_x3l4u0sfH2jz1IXo3sQ6vCeQTG0oKUGOTpEUBJoaAaIDClSaS5pM7vrNnUQIibYA2dLM8tJiafrTTGa1jHHPM3YmbPMbg9mjkhC6_V0qbPE8YnN4bnytUtbCAT95xLNx_VBxpIWBUdRUbNWwEMpXLicyZytfssDHbK2caCHas6O8WzHlXURQKbI4oZvThPxZCZJgqDw",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "http://localhost:8443/realms/car-control/protocol/openid-connect/token/introspect",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8443",
+							"path": [
+								"realms",
+								"car-control",
+								"protocol",
+								"openid-connect",
+								"token",
+								"introspect"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Vehicle CRUD",
+			"item": [
+				{
+					"name": "Get Vehicles",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/v1/vehicle",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"vehicle"
+							],
+							"query": [
+								{
+									"key": "make",
+									"value": "Tesla",
+									"disabled": true
+								},
+								{
+									"key": "make_like",
+									"value": "esl",
+									"disabled": true
+								},
+								{
+									"key": "model",
+									"value": "Model X",
+									"disabled": true
+								},
+								{
+									"key": "model_like",
+									"value": "X",
+									"disabled": true
+								},
+								{
+									"key": "year_min",
+									"value": "2018",
+									"disabled": true
+								},
+								{
+									"key": "year_max",
+									"value": "2022",
+									"disabled": true
+								},
+								{
+									"key": "price_min",
+									"value": "15000",
+									"disabled": true
+								},
+								{
+									"key": "price_max",
+									"value": "25000",
+									"disabled": true
+								},
+								{
+									"key": "currency_code",
+									"value": "EUR",
+									"disabled": true
+								},
+								{
+									"key": "sort_by",
+									"value": "make",
+									"disabled": true
+								},
+								{
+									"key": "sort_order",
+									"value": "DESC",
+									"disabled": true
+								},
+								{
+									"key": "page_size",
+									"value": "20",
+									"disabled": true
+								},
+								{
+									"key": "page_number",
+									"value": "2",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Vehicle By ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/v1/vehicle/:id",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"vehicle",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Vehicle",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICI3aHI4bFFtT2VSNVpTWFprMTJZdzZTN2hhNVRZR1JuZnJId1d1cGFRVUQ0In0.eyJleHAiOjE3Mzk4MDMyMTYsImlhdCI6MTczOTgwMjkxNiwianRpIjoiNWI5MzAzYmMtODgwZC00NzY3LWI4ZDItZTJjM2M0NDVhZmY2IiwiaXNzIjoiaHR0cDovL2xvY2FsaG9zdDo4NDQzL3JlYWxtcy9jYXItY29udHJvbCIsImF1ZCI6WyJjYXItY29udHJvbC1iZSIsImFjY291bnQiXSwic3ViIjoiNmUxYzVmMDEtYzUyMi00MGQ1LWI5OGQtODA1MTc5Y2NjMmYwIiwidHlwIjoiQmVhcmVyIiwiYXpwIjoiY2FyLWNvbnRyb2wtdWkiLCJzaWQiOiI1N2M4YTE3Ny0yZTk1LTQ1NGMtOGYxZC1jMWU3ZDMzNjY3YTMiLCJhY3IiOiIxIiwiYWxsb3dlZC1vcmlnaW5zIjpbImh0dHA6Ly9sb2NhbGhvc3Q6ODA4MCJdLCJyZWFsbV9hY2Nlc3MiOnsicm9sZXMiOlsiZGVmYXVsdC1yb2xlcy1jYXItY29udHJvbCIsIm9mZmxpbmVfYWNjZXNzIiwidW1hX2F1dGhvcml6YXRpb24iXX0sInJlc291cmNlX2FjY2VzcyI6eyJjYXItY29udHJvbC1iZSI6eyJyb2xlcyI6WyJ1bWFfcHJvdGVjdGlvbiJdfSwiYWNjb3VudCI6eyJyb2xlcyI6WyJtYW5hZ2UtYWNjb3VudCIsIm1hbmFnZS1hY2NvdW50LWxpbmtzIiwidmlldy1wcm9maWxlIl19fSwic2NvcGUiOiJlbWFpbCBwcm9maWxlIiwiZW1haWxfdmVyaWZpZWQiOmZhbHNlLCJuYW1lIjoiVGVzdCBVc2VyIiwicHJlZmVycmVkX3VzZXJuYW1lIjoidGVzdHVzZXIiLCJnaXZlbl9uYW1lIjoiVGVzdCIsImZhbWlseV9uYW1lIjoiVXNlciIsImVtYWlsIjoidGVzdHVzZXJAZ21haWwuY29tIn0.L0QjqcFJVxRDvCNxVOBGPFUvi1WA5DHOqMFRxPR_VgAq8Y2BIfTHN8n7bi_i6Ou_dr-cr6UItoNh8JYOuZm1KLbW1A-z0lXo2-49_fhQOelfkl_Yunlh5ExeASKBX54xVCpFppPXZtQI8DpWORyzbhEeDllj5pchIjwE5_xySQSbkDIs-Bvkzaim7yrmj2S2eExrRs9xitVDVgzZJ1bzqiuxULF8A6U_LewtzY1QS4mOCm5qvLnEqM6oQzN7P5ov-viZg3ogrmzx1FfNBjrLhRfRtZHkw2vPJ_Z24FEPNPMX04NpBpUGV3tSZ_oxbtxsYWA75ebXd2lUG5rYwTqdhg",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"vehicle\":   {\n        \"make\": \"Ford\",\n        \"model\": \"Mustang\",\n        \"year\": 2022,\n        \"fuel_type\": \"GASOLINE\",\n        \"door_count\": 2,\n        \"price\": 35000.00,\n        \"currency_code\": \"USD\",\n        \"description\": \"Car is in pristine condition.\"\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/vehicle",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"vehicle"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Vehicle",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICI3aHI4bFFtT2VSNVpTWFprMTJZdzZTN2hhNVRZR1JuZnJId1d1cGFRVUQ0In0.eyJleHAiOjE3Mzk4MDMyMTYsImlhdCI6MTczOTgwMjkxNiwianRpIjoiNWI5MzAzYmMtODgwZC00NzY3LWI4ZDItZTJjM2M0NDVhZmY2IiwiaXNzIjoiaHR0cDovL2xvY2FsaG9zdDo4NDQzL3JlYWxtcy9jYXItY29udHJvbCIsImF1ZCI6WyJjYXItY29udHJvbC1iZSIsImFjY291bnQiXSwic3ViIjoiNmUxYzVmMDEtYzUyMi00MGQ1LWI5OGQtODA1MTc5Y2NjMmYwIiwidHlwIjoiQmVhcmVyIiwiYXpwIjoiY2FyLWNvbnRyb2wtdWkiLCJzaWQiOiI1N2M4YTE3Ny0yZTk1LTQ1NGMtOGYxZC1jMWU3ZDMzNjY3YTMiLCJhY3IiOiIxIiwiYWxsb3dlZC1vcmlnaW5zIjpbImh0dHA6Ly9sb2NhbGhvc3Q6ODA4MCJdLCJyZWFsbV9hY2Nlc3MiOnsicm9sZXMiOlsiZGVmYXVsdC1yb2xlcy1jYXItY29udHJvbCIsIm9mZmxpbmVfYWNjZXNzIiwidW1hX2F1dGhvcml6YXRpb24iXX0sInJlc291cmNlX2FjY2VzcyI6eyJjYXItY29udHJvbC1iZSI6eyJyb2xlcyI6WyJ1bWFfcHJvdGVjdGlvbiJdfSwiYWNjb3VudCI6eyJyb2xlcyI6WyJtYW5hZ2UtYWNjb3VudCIsIm1hbmFnZS1hY2NvdW50LWxpbmtzIiwidmlldy1wcm9maWxlIl19fSwic2NvcGUiOiJlbWFpbCBwcm9maWxlIiwiZW1haWxfdmVyaWZpZWQiOmZhbHNlLCJuYW1lIjoiVGVzdCBVc2VyIiwicHJlZmVycmVkX3VzZXJuYW1lIjoidGVzdHVzZXIiLCJnaXZlbl9uYW1lIjoiVGVzdCIsImZhbWlseV9uYW1lIjoiVXNlciIsImVtYWlsIjoidGVzdHVzZXJAZ21haWwuY29tIn0.L0QjqcFJVxRDvCNxVOBGPFUvi1WA5DHOqMFRxPR_VgAq8Y2BIfTHN8n7bi_i6Ou_dr-cr6UItoNh8JYOuZm1KLbW1A-z0lXo2-49_fhQOelfkl_Yunlh5ExeASKBX54xVCpFppPXZtQI8DpWORyzbhEeDllj5pchIjwE5_xySQSbkDIs-Bvkzaim7yrmj2S2eExrRs9xitVDVgzZJ1bzqiuxULF8A6U_LewtzY1QS4mOCm5qvLnEqM6oQzN7P5ov-viZg3ogrmzx1FfNBjrLhRfRtZHkw2vPJ_Z24FEPNPMX04NpBpUGV3tSZ_oxbtxsYWA75ebXd2lUG5rYwTqdhg",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"vehicle\":   {\n        \"id\": 1,\n        \"make\": \"Ford\",\n        \"model\": \"Mustang\",\n        \"year\": 2021,\n        \"fuel_type\": \"GASOLINE\",\n        \"door_count\": 2,\n        \"price\": 35000.00,\n        \"currency_code\": \"USD\",\n        \"description\": \"New vehicle descirption\"\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/vehicle",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"vehicle"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Vehicle By ID",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICI3aHI4bFFtT2VSNVpTWFprMTJZdzZTN2hhNVRZR1JuZnJId1d1cGFRVUQ0In0.eyJleHAiOjE3Mzk4MDMyMTYsImlhdCI6MTczOTgwMjkxNiwianRpIjoiNWI5MzAzYmMtODgwZC00NzY3LWI4ZDItZTJjM2M0NDVhZmY2IiwiaXNzIjoiaHR0cDovL2xvY2FsaG9zdDo4NDQzL3JlYWxtcy9jYXItY29udHJvbCIsImF1ZCI6WyJjYXItY29udHJvbC1iZSIsImFjY291bnQiXSwic3ViIjoiNmUxYzVmMDEtYzUyMi00MGQ1LWI5OGQtODA1MTc5Y2NjMmYwIiwidHlwIjoiQmVhcmVyIiwiYXpwIjoiY2FyLWNvbnRyb2wtdWkiLCJzaWQiOiI1N2M4YTE3Ny0yZTk1LTQ1NGMtOGYxZC1jMWU3ZDMzNjY3YTMiLCJhY3IiOiIxIiwiYWxsb3dlZC1vcmlnaW5zIjpbImh0dHA6Ly9sb2NhbGhvc3Q6ODA4MCJdLCJyZWFsbV9hY2Nlc3MiOnsicm9sZXMiOlsiZGVmYXVsdC1yb2xlcy1jYXItY29udHJvbCIsIm9mZmxpbmVfYWNjZXNzIiwidW1hX2F1dGhvcml6YXRpb24iXX0sInJlc291cmNlX2FjY2VzcyI6eyJjYXItY29udHJvbC1iZSI6eyJyb2xlcyI6WyJ1bWFfcHJvdGVjdGlvbiJdfSwiYWNjb3VudCI6eyJyb2xlcyI6WyJtYW5hZ2UtYWNjb3VudCIsIm1hbmFnZS1hY2NvdW50LWxpbmtzIiwidmlldy1wcm9maWxlIl19fSwic2NvcGUiOiJlbWFpbCBwcm9maWxlIiwiZW1haWxfdmVyaWZpZWQiOmZhbHNlLCJuYW1lIjoiVGVzdCBVc2VyIiwicHJlZmVycmVkX3VzZXJuYW1lIjoidGVzdHVzZXIiLCJnaXZlbl9uYW1lIjoiVGVzdCIsImZhbWlseV9uYW1lIjoiVXNlciIsImVtYWlsIjoidGVzdHVzZXJAZ21haWwuY29tIn0.L0QjqcFJVxRDvCNxVOBGPFUvi1WA5DHOqMFRxPR_VgAq8Y2BIfTHN8n7bi_i6Ou_dr-cr6UItoNh8JYOuZm1KLbW1A-z0lXo2-49_fhQOelfkl_Yunlh5ExeASKBX54xVCpFppPXZtQI8DpWORyzbhEeDllj5pchIjwE5_xySQSbkDIs-Bvkzaim7yrmj2S2eExrRs9xitVDVgzZJ1bzqiuxULF8A6U_LewtzY1QS4mOCm5qvLnEqM6oQzN7P5ov-viZg3ogrmzx1FfNBjrLhRfRtZHkw2vPJ_Z24FEPNPMX04NpBpUGV3tSZ_oxbtxsYWA75ebXd2lUG5rYwTqdhg",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/v1/vehicle/:id",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"vehicle",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
