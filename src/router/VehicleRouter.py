@@ -85,6 +85,9 @@ def create_vehicle():
 
         new_vehicle_data = request_data['vehicle']
         new_vehicle_entity = Vehicle(**new_vehicle_data)
+        # Due to lazy mapping to vehicle model, in case ID is set, reset it to null
+        # TODO: proper vehicle mapping
+        new_vehicle_entity.id = None
 
         db.session.add(new_vehicle_entity)
         db.session.commit()
